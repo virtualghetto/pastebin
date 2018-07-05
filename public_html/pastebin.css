@@ -21,9 +21,9 @@ h1 {
 	text-align: left;
 	padding: 3px 0px 3px 10px;
 	margin-bottom: 0px;
-	margin-top: 0px; 
+	margin-top: 0px;
 }
-	
+
 #spamform
 {
 	background:#EED0C3;
@@ -48,7 +48,7 @@ background:white;
 }
 
 div.syntax a{
-	font-family: 'Courier New', Courier, monospace; 
+	font-family: 'Courier New', Courier, monospace;
 	font-weight: normal;
 	color:black;
 	text-decoration:underline;
@@ -65,7 +65,7 @@ a {
 a:link {color:#474C7F;}
 a:visited {color:#474C7F;}
 a:hover {text-decoration:underline;}
-  
+
 h1 a{color:white; text-decoration:underline;font-weight:bold;}
 h1 a:link{color:white;}
 h1 a:visited{color:white;}
@@ -77,13 +77,21 @@ h1 a:hover{color:yellow;background-color:transparent;}
 
 }
 
-#titlebar a{color:white; text-decoration:underline;font-weight:bold;}
+#titlebar a{color:white;
+	text-decoration:none;
+	font-weight:normal;
+	font-family:Georgia,Times New Roman,serif;
+	font-size:20px;
+	padding: 0px 0px 0px 5px;
+	height:24px;
+	margin-bottom: 11px;
+}
 #titlebar a:link{color:white;}
 #titlebar a:visited{color:white;}
 #titlebar a:hover{color:yellow;background-color:transparent;}
 
 a.code {
-	text-decoration:underline; 
+	text-decoration:underline;
 	font-family:courier, fixed;
 	font-weight:normal;}
 a.code:link {color:#09c;}
@@ -109,19 +117,20 @@ code { font-size:12px;width:98%;}
 }
 
 .nav { margin: 0px 5px 0px 5px; }
-	
+
 
 
 #Content>p {margin:0px;}
 #Content>p+p {text-indent:30px;}
 
 #content {
-	margin:0px 0px 50px 150px;
+	margin:0px 0px 50px 10px;
 	padding:5px;
+	overflow: auto;
 }
 
 #menu {
-	position:absolute;
+	float:left;
 	top:24px;
 	left:0px;
 	width:162px;
@@ -170,13 +179,13 @@ li.highlight{ background-color: #D9D0C3; }
 {
 	padding-left:3px;
 	padding-right:3px;
-	
+
 }
 
 #expirybox label.current
 {
 	background:#FFF5E6;
-	
+
 }
 
 #expiryinfo
@@ -194,7 +203,7 @@ li.highlight{ background-color: #D9D0C3; }
 	clear:both;
 }
 
-table.diff 
+table.diff
 {
 	background:white;
 }
@@ -210,7 +219,7 @@ table.diff td
 table.diff td.code
 {
 	text-align:left;
-	font-family: 'Courier New', Courier, monospace; 
+	font-family: 'Courier New', Courier, monospace;
 	font-weight: normal;
 }
 

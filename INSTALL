@@ -49,6 +49,8 @@ being accessible via HTTP.
 If using the "mysql" storage engine, setup a new database with the following 
 table
 
+ALTER DATABASE `pastebindb` COLLATE utf8_general_ci
+
 CREATE TABLE `pastebin` (
 	  `pid` int(11) NOT NULL auto_increment,
 	  `poster` varchar(16) default NULL,
@@ -60,7 +62,8 @@ CREATE TABLE `pastebin` (
 	  `codecss` text,
 	  `domain` varchar(255) default '',
 	  `expires` DATETIME,
-	  `expiry_flag` ENUM('d','m', 'f') NOT NULL DEFAULT 'm',
+	  `expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
+	  `ip` varchar(15) default NULL,
 	  
 	  PRIMARY KEY  (`pid`),
 	  KEY `domain` (`domain`),
@@ -77,6 +80,12 @@ create table recent
 	primary key(domain,seq_no)
 );
 
+CREATE TABLE `abuse`
+(
+	  `pid` int(11) NOT NULL,
+	  `domain` varchar(255) default '',
+	  `msg` text
+);
 
 If using the "file" storage engine, make sure the public_html/../posts 
 directory is writable by the webserver.
