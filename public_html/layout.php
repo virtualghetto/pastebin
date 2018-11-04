@@ -412,8 +412,7 @@ if (isset($_GET['help']))
         p('Do not aggressively spider the site.');
 
         h1('Can I host my own copy of the pastebin software?');
-        p('The source code to this site is available under a GPL licence. '.
-                'You can find it on <a title="Pastebin source code" href="https://github.com/virtualghetto/pastebin/tree/vghetto">github</a> under the vghetto branch.');
+        p('The source code to this site is available under a GPL licence. ');
 
 }
 else
