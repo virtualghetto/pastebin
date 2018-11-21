@@ -24,6 +24,9 @@
 
 echo "<?xml version=\"1.0\" encoding=\"".$charset_code[$charset]['http']."\"?>\n";
 
+if (!isset($pid)) {
+	$pid='';
+}
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
@@ -117,7 +120,7 @@ if ($is_admin){
 	echo '<ul>';
 	foreach($page['recent'] as $idx=>$entry)
 	{
-		if (isset($pid) && ($entry['pid']==$pid))
+		if (isset($entry['pid']) && isset($pid) && ($entry['pid']==$pid))
 			$cls=" class=\"highlight\"";
 		else
 			$cls="";
