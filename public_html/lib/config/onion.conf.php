@@ -97,7 +97,7 @@ $CONF['url_format']='/?show=%s';
 /**
 * default expiry time d (day) m (month) or f (forever)
 */
-$CONF['default_expiry']='d';
+$CONF['default_expiry']='m';
 
 /**
 * this is the path to the script - you may want to
