@@ -53,16 +53,16 @@ ALTER DATABASE `pastebindb` COLLATE utf8_general_ci
 
 CREATE TABLE `pastebin` (
 	  `pid` int(11) NOT NULL auto_increment,
+	  `domain` varchar(255) default '',
 	  `poster` varchar(16) default NULL,
 	  `posted` datetime default NULL,
-	  `code` text,
 	  `parent_pid` int(11) default '0',
+	  `expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
+	  `expires` DATETIME,
 	  `format` varchar(16) default NULL,
+	  `code` text,
 	  `codefmt` mediumtext,
 	  `codecss` text,
-	  `domain` varchar(255) default '',
-	  `expires` DATETIME,
-	  `expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
 	  `ip` varchar(15) default NULL,
 	  
 	  PRIMARY KEY  (`pid`),
@@ -73,8 +73,8 @@ CREATE TABLE `pastebin` (
 
 create table recent
 (
-	domain varchar(255),
 	pid int not null,
+	domain varchar(255),
 	seq_no int not null,
 	
 	primary key(domain,seq_no)

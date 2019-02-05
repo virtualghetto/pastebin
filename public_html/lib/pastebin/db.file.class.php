@@ -83,8 +83,8 @@ class DB
 	function _idToPath($id, $ensure_dirs=true)
 	{
 		//build directory and filename
-    	//format is f/aa/bb/cc/faabbccdd
-    	$dir=$this->postdir.substr($id,0,1); if ($ensure_dirs && !is_dir($dir)) mkdir($dir);
+		//format is f/aa/bb/cc/faabbccdd
+		$dir=$this->postdir.substr($id,0,1); if ($ensure_dirs && !is_dir($dir)) mkdir($dir);
 		//$dir.='/'.substr($id,1,2); if ($ensure_dirs && !is_dir($dir)) mkdir($dir);
 		//$dir.='/'.substr($id,3,2); if ($ensure_dirs && !is_dir($dir)) mkdir($dir);
 		//$dir.='/'.substr($id,5,2); if ($ensure_dirs && !is_dir($dir)) mkdir($dir);
@@ -563,9 +563,6 @@ class DB
 				fclose($fp);
 			}
 		}
-
-
-
 	}
 
 

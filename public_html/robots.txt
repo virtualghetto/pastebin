@@ -9,4 +9,4 @@ User-agent:Wget
 Disallow: /
 
 User-agent: dotbot
-Disallow: / 
+Disallow: /

@@ -109,6 +109,8 @@ class DB extends MySQL
 	function _deleteExpiredPosts()
 	{
 		$this->query("delete from pastebin where expires is not null and now() > expires");
+		$this->query("delete from abuse where pid not in (select pid from pastebin) ");
+		$this->query("delete from recent where pid not in (select pid from pastebin) ");
 	}
 
 	/**
@@ -122,7 +124,7 @@ class DB extends MySQL
 	/**
 	* erase a post
 	*/
-	function deletePost($pid, $delete_linked=false)
+	function deletePost($pid, $delete_linked=false, $depth=0)
 	{
 		$this->query('delete from pastebin where pid=?', $pid);
 		return true;
@@ -360,6 +362,13 @@ class DB extends MySQL
 
 	function getAbusePostSummary($subdomain)
 	{
+		global $is_admin;
+
+		$posts=array();
+
+		if (!$is_admin)
+			return $posts;
+
 		$posts=array();
 		$this->query("select pid ".
 			"from abuse ".
@@ -376,15 +385,93 @@ class DB extends MySQL
 
 	function getAbusePost($id, $subdomain)
 	{
+		global $is_admin;
+
+		$aabuse=array();
+
+		if (!$is_admin)
+			return false;
+
 		$this->query('select msg '.
 			'from abuse where pid=? and domain=?', $id, $subdomain);
-		if ($this->next_record())
-			return $this->row;
-		else
-			return false;
+		while ($this->next_record())
+		{
+			$aabuse[]=$this->row;
+		}
+
+		$abuse='';
+
+		if(count($aabuse))
+		{
+			foreach ($aabuse as $ab)
+			{
+				$abuse=$abuse . implode(' ',$ab);
+			}
+			if(!strlen($abuse))
+				$abuse=false;
+		}
+
+		return $abuse;
 	}
 
+	/**
+	* The class uses this internally to find out the current time
+	* For implementing historical loading of the db, you can use this to
+	* set a "fake" now time...
+	* access public
+	*/
+	function now($override=0)
+	{
+		if ($override>0)
+			$this->now=$override;
 
+		if (isset($this->now))
+			return $this->now;
+		else
+			return time();
+	}
 
+	function createdb()
+	{
+		/*
+		ALTER DATABASE `pastebindb` COLLATE utf8_general_ci;
+
+		CREATE TABLE `pastebin` (
+			`pid` int(11) NOT NULL auto_increment,
+			`domain` varchar(255) default '',
+			`poster` varchar(16) default NULL,
+			`posted` datetime default NULL,
+			`parent_pid` int(11) default '0',
+			`expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
+			`expires` DATETIME,
+			`format` varchar(16) default NULL,
+			`code` text,
+			`codefmt` mediumtext,
+			`codecss` text,
+			`ip` varchar(15) default NULL,
+
+			PRIMARY KEY  (`pid`),
+			KEY `domain` (`domain`),
+			KEY `parent_pid` (`parent_pid`),
+			KEY `expires` (`expires`)
+		);
+
+		create table recent
+		(
+			pid int not null,
+			domain varchar(255),
+			seq_no int not null,
+
+			primary key(domain,seq_no)
+		);
+
+		CREATE TABLE `abuse`
+		(
+			`pid` int(11) NOT NULL,
+			`domain` varchar(255) default '',
+			`msg` text
+		);
+		*/
+	}
 }
 ?>
