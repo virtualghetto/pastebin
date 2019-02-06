@@ -78,7 +78,7 @@ class MySQL
 			$sql=str_replace('?', $q, $sql);
 
 			$args=func_get_args();
-			for ($i=1; $i<=count($args); $i++)
+			for ($i=1; $i<count($args); $i++)
 			{
 				$sql=preg_replace("/$q/", "'".preg_quote(mysqli_real_escape_string($this->dblink, $args[$i]))."'", $sql,1);
 

@@ -310,7 +310,7 @@ class DB extends MySQL
 			$sql=str_replace('?', $q, $sql);
 
 			$args=func_get_args();
-			for ($i=2; $i<=count($args); $i++)
+			for ($i=2; $i<count($args); $i++)
 			{
 				$sql=preg_replace("/$q/", "'".preg_quote(mysqli_real_escape_string($this->dblink, $args[$i]))."'", $sql,1);
 
