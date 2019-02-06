@@ -437,6 +437,7 @@ class DB extends MySQL
 	function createdb()
 	{
 		/*
+
 		ALTER DATABASE `pastebindb` COLLATE utf8_general_ci;
 
 		CREATE TABLE `pastebin` (
@@ -465,6 +466,7 @@ class DB extends MySQL
 			`domain` varchar(255) default '',
 			`msg` text
 		);
+
 		*/
 	}
 }

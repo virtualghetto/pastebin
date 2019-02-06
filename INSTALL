@@ -49,14 +49,14 @@ being accessible via HTTP.
 If using the "mysql" storage engine, setup a new database with the following 
 table
 
-ALTER DATABASE `pastebindb` COLLATE utf8_general_ci
+ALTER DATABASE `pastebindb` COLLATE utf8_general_ci;
 
 CREATE TABLE `pastebin` (
-	  `pid` int(11) NOT NULL auto_increment,
+	  `pid` varchar(11) NOT NULL,
 	  `domain` varchar(255) default '',
 	  `poster` varchar(16) default NULL,
 	  `posted` datetime default NULL,
-	  `parent_pid` int(11) default '0',
+	  `parent_pid` varchar(11) NOT NULL default '0',
 	  `expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
 	  `expires` DATETIME,
 	  `format` varchar(16) default NULL,
@@ -71,18 +71,9 @@ CREATE TABLE `pastebin` (
 	  KEY `expires` (`expires`)
 	);
 
-create table recent
-(
-	pid int not null,
-	domain varchar(255),
-	seq_no int not null,
-	
-	primary key(domain,seq_no)
-);
-
 CREATE TABLE `abuse`
 (
-	  `pid` int(11) NOT NULL,
+	  `pid` varchar(11) NOT NULL,
 	  `domain` varchar(255) default '',
 	  `msg` text
 );
