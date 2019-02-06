@@ -180,7 +180,7 @@ class DB extends MySQL
 		//but once the pastebin table gets >10,000 entries, things can get pretty slow
 
 		//flush recent list
-		$this->_cacheflush('recent'.$domain);
+		$this->_cacheflush('recent'.$subdomain);
 
 		return $id;
 	}
