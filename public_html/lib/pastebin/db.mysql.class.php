@@ -370,7 +370,7 @@ class DB extends MySQL
 			return $posts;
 
 		$posts=array();
-		$this->query("select pid ".
+		$this->query("select distinct pid ".
 			"from abuse ".
 			"where domain=? ".
 			"order by pid desc", $subdomain);
@@ -387,31 +387,24 @@ class DB extends MySQL
 	{
 		global $is_admin;
 
-		$aabuse=array();
-
 		if (!$is_admin)
 			return false;
 
+		$abuse='';
+		$hasabuse=false;
 		$this->query('select msg '.
 			'from abuse where pid=? and domain=?', $id, $subdomain);
-		while ($this->next_record())
+		while($this->next_record())
 		{
-			$aabuse[]=$this->row;
+			$hasabuse=true;
+			//$abuse=$abuse . implode(' ',$this->f('msg'));
+			$abuse=$abuse . $this->f('msg');
 		}
 
-		$abuse='';
-
-		if(count($aabuse))
-		{
-			foreach ($aabuse as $ab)
-			{
-				$abuse=$abuse . implode(' ',$ab);
-			}
-			if(!strlen($abuse))
-				$abuse=false;
-		}
-
-		return $abuse;
+		if($hasabuse)
+			return $abuse;
+		else
+			return false;
 	}
 
 	/**
