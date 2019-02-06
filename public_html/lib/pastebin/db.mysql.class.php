@@ -110,7 +110,6 @@ class DB extends MySQL
 	{
 		$this->query("delete from pastebin where expires is not null and now() > expires");
 		$this->query("delete from abuse where pid not in (select pid from pastebin) ");
-		$this->query("delete from recent where pid not in (select pid from pastebin) ");
 	}
 
 	/**
@@ -118,7 +117,10 @@ class DB extends MySQL
 	*/
 	function cleanPostId($raw)
 	{
-		return intval($raw);
+		if (preg_match('/^[hdmf][a-f0-9]{4,8}$/', $raw))
+			return $raw;
+		else
+			return "";
 	}
 
 	/**
@@ -136,6 +138,7 @@ class DB extends MySQL
 	*/
 	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$token)
 	{
+		$id="";
 		//figure out expiry time
 		switch ($expiry_flag)
 		{
@@ -155,19 +158,26 @@ class DB extends MySQL
 
 		}
 
+		//try and get a unique filename
+		$un=false;
+		while (!$un)
+		{
+			//get a random id
+			$id=$expiry_flag.dechex(mt_rand(1,2147483647));
+			$this->query("select distinct pid from pastebin where pid=?", $id);
+			if ($this->next_record())
+				$un=false;
+			else
+				$un=true;
+		}
 
-		$this->query('insert into pastebin (poster, domain, posted, format, code, parent_pid, expires,expiry_flag, ip) '.
-				"values (?, ?, now(), ?, ?, ?, $expires, ?, ?)",
-				$poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $_SERVER['REMOTE_ADDR']);
-		$id=$this->get_insert_id();
+		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires,expiry_flag, ip) '.
+				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?)",
+				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $_SERVER['REMOTE_ADDR']);
+		//$id=$this->get_insert_id();
 
 		//add post to mru list - for small installations, this isn't really necessary
 		//but once the pastebin table gets >10,000 entries, things can get pretty slow
-		$this->query('lock tables recent write');
-		$this->query('update recent set seq_no=seq_no+1 where domain=? order by seq_no desc', $subdomain);
-		$this->query('insert into recent (domain,seq_no,pid) values (?,1,?)', $subdomain, $id);
-		$this->query('delete from recent where domain=? and seq_no=11', $subdomain);
-		$this->query('unlock tables');
 
 		//flush recent list
 		$this->_cacheflush('recent'.$domain);
@@ -208,7 +218,7 @@ class DB extends MySQL
 		$posts=$this->_cachedquery($cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
 			"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
 			"from pastebin as p ".
-			"inner join recent as r on (r.domain=? and p.pid=r.pid) ".
+			"where p.domain=? ".
 			"order by p.posted desc, p.pid desc $limit", $subdomain);
 
 		return $posts;
@@ -430,11 +440,11 @@ class DB extends MySQL
 		ALTER DATABASE `pastebindb` COLLATE utf8_general_ci;
 
 		CREATE TABLE `pastebin` (
-			`pid` int(11) NOT NULL auto_increment,
+			`pid` varchar(11) NOT NULL,
 			`domain` varchar(255) default '',
 			`poster` varchar(16) default NULL,
 			`posted` datetime default NULL,
-			`parent_pid` int(11) default '0',
+			`parent_pid` varchar(11) NOT NULL default '0',
 			`expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
 			`expires` DATETIME,
 			`format` varchar(16) default NULL,
@@ -449,18 +459,9 @@ class DB extends MySQL
 			KEY `expires` (`expires`)
 		);
 
-		create table recent
-		(
-			pid int not null,
-			domain varchar(255),
-			seq_no int not null,
-
-			primary key(domain,seq_no)
-		);
-
 		CREATE TABLE `abuse`
 		(
-			`pid` int(11) NOT NULL,
+			`pid` varchar(11) NOT NULL,
 			`domain` varchar(255) default '',
 			`msg` text
 		);
