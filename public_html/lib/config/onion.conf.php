@@ -127,11 +127,6 @@ $CONF['base_domain_elements']=2;
 
 
 /**
-* Google Adsense, clear this to remove ads.
-*/
-$CONF['google_ad_client']=null;
-
-/**
 * maintainer mode enables some code used to aid translation - unless you
 * are involved in developing pastebin, leave this as false
 */

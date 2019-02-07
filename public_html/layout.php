@@ -89,6 +89,7 @@ if ($is_admin){
 		$bullets.= '<li><a href="'.$entry['url'].'">'.$entry['pid'].'</a></li>';
 		$count++;
 	}
+
 	echo '<h1>'.t('Abuse').' ('.$count.')</h1><ul>';
         echo $bullets;
 
@@ -99,20 +100,13 @@ if ($is_admin){
 	echo '<p>' . t('Run ') . "<a href=\"{$CONF['this_script']}?cron=1\">" . t('cron') . '</a>' . t(' cleanup job.') . '</p>';
 }
 
-
 	//About block
 	echo '<h1>'.t('About').'</h1>';
 	echo '<p>' . t('See ') . "<a href=\"{$CONF['this_script']}?help=1\">" . t('help') . '</a>' . t(' for details.') . '</p>';
-	//echo '<p>' . t('Pastebin is a tool for collaborative debugging or editing,');
-	//echo " <a href=\"{$CONF['this_script']}?help=1\">" . t('See help for details') . '</a>.</p>';
 
 	echo '<ul>';
 	echo "<li><a rel=\"nofollow\" href=\"{$CONF['this_script']}\">".t('Make a new post').'</a></li>';
 	echo '</ul>';
-
-	//Encryption help block
-	//echo '<h1>'.t('Encryption').'</h1>';
-	//echo '<p>' . t('Use \'gpg -ac\' to encrypt and \'gpg -d\' to decrypt.') . '</p>';
 
 	//Recent posts block
 	echo '<h1>'.t('Recent Posts').'</h1>';
@@ -244,7 +238,8 @@ if (!empty($page['post']['posttitle']))
 
 
 		$followups=0;
-		if(isset($page['post']['followups'])) $followups=count($page['post']['followups']);
+		if(isset($page['post']['followups']))
+			$followups=count($page['post']['followups']);
 		if ($followups)
 		{
 			echo t('View followups from ');
@@ -343,9 +338,9 @@ if (isset($_GET['help']))
 	echo '<ul>';
 
 	li('<a href="/">Submit</a> a code fragment to pastebin, getting a url like ' . $pastebin->getPostUrl("m2a3b4c5d") . '');
-	li('Paste the url into an IRC or IM conversation');
-	li('Someone responds by reading and perhaps submitting a modification of your code');
-	li('You then view the modification, maybe using the built in diff tool to help locate the changes');
+	li('Paste the url into an IRC or IM conversation.');
+	li('Someone responds by reading and perhaps submitting a modification of your code.');
+	li('You then view the modification, maybe using the built in diff tool to help locate the changes.');
 	printf(t('<li>To highlight particular lines, prefix each line with %s</li>'),$CONF['highlight_prefix']);
 
 
@@ -356,13 +351,14 @@ if (isset($_GET['help']))
 
 	p('When you view a post, you have the opportunity of editing the text - '.
 		'<strong>this creates a new post</strong>, but when you view it, you\'ll be given a '.
-		'\'diff\' link which allows you to compare the changes between the old and the new version');
-	p('This is a powerful feature, great for seeing exactly what lines someone changed');
+		'\'diff\' link which allows you to compare the changes between the old and the new version.');
+	p('This is a powerful feature, great for seeing exactly what lines someone changed.');
 
 
 	h1('How can I delete a post?');
 	p('If you clicked the "remember me" checkbox when posting, you will be able to delete '.
 	'post from the same computer you posted from - simply view the post and click the "delete post" link.');
+	p('In other cases, contact us and we will delete it for you.');
 
 	h1('What\'s a private pastebin and how do I get one?');
 
@@ -404,9 +400,6 @@ if (isset($_GET['help']))
 	}
 
 	echo '</p>';
-
-	//h1('How can I secure a post?');
-	//p('You can use gpg -ac to password encrypt a post, and gpg -d to decrypt the post.');
 
         h1('Acceptable Use Policy');
         p('Broadly speaking, the site was created to help programmers. Any post or usage pattern not related to that goal which results in unusually high traffic '.

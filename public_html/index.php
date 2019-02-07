@@ -55,15 +55,12 @@ $CONF['http_charset']=$charset_code[$charset]['http'];
 
 set_time_limit(180);
 
-/*
-if (isset($_GET['maintain']))
+$is_admin=(isset($_COOKIE['admin']) && ($_COOKIE['admin']==md5($CONF['admin'])));
+
+if (isset($_GET['maintain']) && $is_admin)
 {
 	$CONF["maintainer_mode"]=1;
 }
-*/
-
-$is_admin=(isset($_COOKIE['admin']) && ($_COOKIE['admin']==md5($CONF['admin'])));
-
 
 //////////////////////////////////////////////
 // translation support
@@ -230,14 +227,11 @@ if (isset($_GET['dl']))
 }
 
 
-if (isset($_GET['cron']))
+if (isset($_GET['cron']) && $is_admin)
 {
-	if ($is_admin)
-	{
-		$pastebin->doCron();
-		echo "curl -v --cookie 'admin=md5(password)' '{$CONF['SCHEME']}://{$CONF['basedomain']}{$CONF['this_script']}?cron=1'" . "\n";
-		exit;
-	}
+	$pastebin->doCron();
+	echo "curl -v --cookie 'admin=md5(password)' '{$CONF['SCHEME']}://{$CONF['basedomain']}{$CONF['this_script']}?cron=1'" . "\n";
+	exit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -264,10 +258,14 @@ if ($cookie)
 {
 	//initialise bits of page with cookie data
 	$page['remember']='checked="checked"';
-	if(isset($cookie['last_format'])) $page['current_format']=$cookie['last_format'];
-	if(isset($cookie['poster'])) $page['poster']=$cookie['poster'];
-	if(isset($cookie['last_expiry'])) $page['expiry']=$cookie['last_expiry'];
-	if(isset($cookie['token'])) $page['token']=$cookie['token'];
+	if(isset($cookie['last_format']))
+		$page['current_format']=$cookie['last_format'];
+	if(isset($cookie['poster']))
+		$page['poster']=$cookie['poster'];
+	if(isset($cookie['last_expiry']))
+		$page['expiry']=$cookie['last_expiry'];
+	if(isset($cookie['token']))
+		$page['token']=$cookie['token'];
 }
 
 
@@ -301,7 +299,8 @@ if (isset($_POST['feedback']) && strlen($_POST['msg']))
 			}
 		}
 
-		$page['thankyou']=t('Thanks for your feedback, it was promptly sent to /dev/null.');
+		@mail($CONF['feedback_to'], "Pastebin Feedback", $msg, "From: {$CONF['feedback_sender']}");
+		$page['thankyou']=t('Thanks for your feedback, if you included an email address in your message, we\'ll get back to you asap.');
 	}
 	else
 	{
@@ -392,8 +391,8 @@ if (isset($_POST['abuse']))
 
 		/*
 		$email="Possible spam post, click link to view\n";
-                $email.="View: http://{$_SERVER['HTTP_HOST']}/$pid\n";
-                $email.="Delete: http://{$_SERVER['HTTP_HOST']}/?erase=$pid\n";
+                $email.="View: {$CONF['SCHEME']}://{$_SERVER['HTTP_HOST']}/$pid\n";
+                $email.="Delete: {$CONF['SCHEME']}://{$_SERVER['HTTP_HOST']}/?erase=$pid\n";
                 $email.=$msg;
 		@mail($CONF['feedback_to'], "$duration Pastebin Abuse $pid ($abuse)", $email, "From: {$CONF['feedback_sender']}");
 		*/
@@ -410,7 +409,6 @@ if (isset($_POST['abuse']))
 //add list of recent posts
 $list=isset($_REQUEST["list"]) ? intval($_REQUEST["list"]) : 10;
 $page['recent']=$pastebin->getRecentPosts($list);
-
 $page['abuse']=$pastebin->getAbusePosts();
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -434,7 +432,7 @@ if (isset($_REQUEST["show"]))
                 $is_bot=preg_match('/bot|slurp/i',$_SERVER['HTTP_USER_AGENT']);
 		if ($is_bot)
 		{
-		    echo 'Pastebin post expired or deleted - <a href="http://pastebin.com/">click here to make a new post<a/>';
+		    echo "Pastebin post expired or deleted - <a href=\"{$CONF['SCHEME']}://{$CONF['basedomain']}/\">click here to make a new post</a>";
 		    exit;
 		}
 	}
