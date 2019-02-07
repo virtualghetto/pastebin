@@ -129,6 +129,7 @@ class DB extends MySQL
 	function deletePost($pid, $delete_linked=false, $depth=0)
 	{
 		$this->query('delete from pastebin where pid=?', $pid);
+		$this->query('delete from abuse where pid=?', $pid);
 		return true;
 	}
 
