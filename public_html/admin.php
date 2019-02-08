@@ -41,9 +41,29 @@ if (isset($_POST['pass']) && ($_POST['pass']==$CONF['admin']))
 	$_COOKIE['admin']=md5($_POST['pass']);
 }
 
+if (isset($_POST['logout']) && isset($_COOKIE['admin']))
+{
+	$dom=explode('.', $_SERVER['HTTP_HOST']);
+	while (count($dom)>2)
+		array_shift($dom);
+	$base='.'.implode('.',$dom);
+
+
+
+	setcookie("admin", "", time()-86400*365, "/", $base);
+	$_COOKIE['admin']="";
+	unset($_COOKIE['admin']);
+}
+
 if (isset($_COOKIE['admin']))
 {
 	echo "You are logged in";
+?>
+	<form method="post" action="admin.php">
+	<label for="logout">Logout</label>
+	<input type="submit" name="logout" value="Logout" />
+	</form>
+<?php
 }
 else
 {
