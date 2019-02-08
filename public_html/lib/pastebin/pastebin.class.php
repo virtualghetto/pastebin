@@ -90,8 +90,16 @@ class Pastebin
 	*/
 	function _cleanExpiry($expiry)
 	{
-		if (!preg_match('/^[hdmf]$/', $expiry))
-			$expiry='d';
+		global $is_admin;
+
+		if($is_admin || $this->conf['allow_forever'])
+		{
+			if (!preg_match('/^[hdmf]$/', $expiry))
+				$expiry='m';
+		}else{
+			if (!preg_match('/^[hdm]$/', $expiry))
+				$expiry='m';
+		}
 
 		return $expiry;
 	}
@@ -234,7 +242,7 @@ class Pastebin
 
 	function getPostUrl($id)
 	{
-		global $CONF;
+		//global $CONF;
 		return sprintf("{$this->conf['SCHEME']}://{$_SERVER['HTTP_HOST']}".$this->conf['url_format'], $id);
 	}
 

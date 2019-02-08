@@ -485,7 +485,7 @@ if (!empty($page['post']['editcode'])) {
 <input type="radio" id="expiry_month" name="expiry" value="m" <?php if ($page['expiry']=='m') echo 'checked="checked"'; ?> />
 <label id="expiry_month_label" for="expiry_month"><?php echo t('a month') ?></label>
 
-<?php if ($is_admin){
+<?php if ($is_admin || $CONF['allow_forever'] ){
 echo '<input type="radio" id="expiry_forever" name="expiry" value="f" ';
 if ($page['expiry']=='f') echo 'checked="checked"';
 echo ' />';

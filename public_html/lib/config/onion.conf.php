@@ -100,6 +100,11 @@ $CONF['url_format']='/?show=%s';
 $CONF['default_expiry']='m';
 
 /**
+* Allow forever posts
+*/
+$CONF['allow_forever']=false;
+
+/**
 * this is the path to the script - you may want to
 * to use / for even shorter urls if the main script
 * is renamed to index.php
