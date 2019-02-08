@@ -194,6 +194,31 @@ li.highlight{ background-color: #D9D0C3; }
 	font-style:italic;
 }
 
+#privatebox
+{
+	float:left;
+	margin-left:20px;
+}
+
+#privatebox label
+{
+	padding-left:3px;
+	padding-right:3px;
+
+}
+
+#privatebox label.current
+{
+	background:#FFF5E6;
+
+}
+
+#privateinfo
+{
+	color:#000000;
+	font-style:italic;
+}
+
 #email
 {
 	display:none;

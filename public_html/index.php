@@ -242,6 +242,7 @@ $page=array();
 //figure out some nice defaults
 $page['current_format']=$CONF['default_highlighter'];
 $page['expiry']=$CONF['default_expiry'];
+$page['private']='n';
 $page['remember']='';
 
 //see if we can come up with a better default using the subdomain
@@ -264,6 +265,8 @@ if ($cookie)
 		$page['poster']=$cookie['poster'];
 	if(isset($cookie['last_expiry']))
 		$page['expiry']=$cookie['last_expiry'];
+	if(isset($cookie['last_private']))
+		$page['private']=$cookie['last_private'];
 	if(isset($cookie['token']))
 		$page['token']=$cookie['token'];
 }
@@ -460,6 +463,8 @@ if (isset($_REQUEST["show"]))
 
 	//ensure corrent format is selected
 	$page['current_format']=isset($page['post']['format'])?$page['post']['format']:'';
+	$page['expiry']=isset($page['post']['expiry_flag'])?$page['post']['expiry_flag']:$CONF['default_expiry'];
+	$page['private']=isset($page['post']['private_flag'])?$page['post']['private_flag']:'n';
 }
 else
 {
@@ -485,7 +490,7 @@ $page['title']=	$CONF['title'];
 //on a subdomain, label it as private...
 if (strlen($CONF['subdomain']))
 {
-	$page['title']=$CONF['subdomain']. ' private pastebin';
+	$page['title']=$CONF['subdomain']. ' pastebin';
 }
 elseif (($page['current_format']!='text') && isset($CONF['all_syntax'][$page['current_format']]))
 {

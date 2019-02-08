@@ -58,6 +58,7 @@ CREATE TABLE `pastebin` (
 	  `posted` datetime default NULL,
 	  `parent_pid` varchar(11) NOT NULL default '0',
 	  `expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
+	  `private_flag` ENUM('y', 'n') NOT NULL DEFAULT 'n',
 	  `expires` DATETIME,
 	  `format` varchar(16) default NULL,
 	  `code` text,

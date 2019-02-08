@@ -96,6 +96,16 @@ class Pastebin
 		return $expiry;
 	}
 
+	/**
+	* Private method for validating a user-submitted private code
+	*/
+	function _cleanPrivate($private)
+	{
+		if (!preg_match('/^[yn]$/', $private))
+			$private='n';
+
+		return $private;
+	}
 
 	/**
 	* returns array of cookie info if present, false otherwise
@@ -109,12 +119,13 @@ class Pastebin
 			$data=array();
 
 			//blow apart the cookie
-			list($poster,$last_format,$last_expiry)=explode('#', $_COOKIE["persistName"]);
+			list($poster,$last_format,$last_expiry,$last_private)=explode('#', $_COOKIE["persistName"]);
 
 			//clean and validate the cookie inputs
 			$data['poster']=$this->_cleanUsername($poster);
 			$data['last_format']=$this->_cleanFormat($last_format);
-			$data['last_expiry']=$this->_cleanFormat($last_expiry);
+			$data['last_expiry']=$this->_cleanExpiry($last_expiry);
+			$data['last_private']=$this->_cleanPrivate($last_private);
 			$data['token']=0;
 		}
 
@@ -132,6 +143,7 @@ class Pastebin
 	//$post['poster'] = name of poster, empty for anonymous
 	//$post['format'] = syntax highlight format
 	//$post['expiry'] = h d m or f for the expiry time
+	//$post['private'] = y n for the listing in recent posts
 	//$post['code2']  = posted code
 	//this method assumes that inputs do NOT have "magic" quotes!
 	//returns post id if successful
@@ -146,6 +158,7 @@ class Pastebin
 		$post['poster']=$this->_cleanUsername($post['poster']);
 		$post['format']=$this->_cleanFormat($post['format']);
 		$post['expiry']=$this->_cleanExpiry($post['expiry']);
+		$post['private']=$this->_cleanPrivate($post['private']);
 
 		//get a token we'll use to remember this post
 		$post['token']=isset($_COOKIE['persistToken'])?
@@ -156,7 +169,7 @@ class Pastebin
 		//set/clear the persistName cookie
 		if (isset($post['remember']))
 		{
-			$value=$post['poster'].'#'.$post['format'].'#'.$post['expiry'];
+			$value=$post['poster'].'#'.$post['format'].'#'.$post['expiry'].'#'.$post['private'];
 
 			//set cookie if not set
 			if (!isset($_COOKIE['persistName']) ||
@@ -198,7 +211,7 @@ class Pastebin
 					$parent_pid=$this->cleanPostId($post['parent_pid']);
 
 				$id=$this->db->addPost($post['poster'],$this->conf['subdomain'],$format,$code,
-					$parent_pid,$post['expiry'],$post['token']);
+					$parent_pid,$post['expiry'],$post['private'],$post['token']);
 			}
 			else
 			{

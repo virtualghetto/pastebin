@@ -69,7 +69,7 @@ for a variety of options.</p>
 	}
 	else
 	{
-		echo " <a href=\"{$CONF['this_script']}?help=1\">What's a private pastebin?</a>";
+		echo " <a href=\"{$CONF['this_script']}?help=1\">What's a sub-domain pastebin?</a>";
 	}
 	*/
 ?>
@@ -360,15 +360,15 @@ if (isset($_GET['help']))
 	'post from the same computer you posted from - simply view the post and click the "delete post" link.');
 	p('In other cases, contact us and we will delete it for you.');
 
-	h1('What\'s a private pastebin and how do I get one?');
+	h1('What\'s a sub-domain pastebin and how do I get one?');
 
-	p('You get a private pastebin simply by thinking up a domain name no-one else is using, '.
-	'e.g. ' . $CONF['SCHEME'] . '://private.' . $CONF['basedomain'] . ' .');
+	p('You get a sub-domain pastebin simply by thinking up a domain name no-one else is using, ');
+	p('e.g. ' . $CONF['SCHEME'] . '://sub-domain.' . $CONF['basedomain'] . ' .');
 
-	p('Posts made into a subdomain only show up on that domain, making it easy for you to collaborate without the '.
+	p('Posts made into a sub-domain only show up on that domain, making it easy for you to collaborate without the '.
 	'\'noise\' of the regular service at <a href="' . $CONF['SCHEME'] . '://' . $CONF['basedomain'] . '">' . $CONF['SCHEME'] . '://' . $CONF['basedomain'] . '</a>');
 
-	p('All you need to do is change the web address in your browser to access a private pastebin, '.
+	p('All you need to do is change the web address in your browser to access a sub-domain pastebin, '.
 		'or you can simply enter the domain you\'d like below.')
 	?>
 
@@ -380,12 +380,12 @@ if (isset($_GET['help']))
 	</form>
 	<?php
 
-	p('Please note that there is no password protection - subdomains are accessible to anyone '.
+	p('Please note that there is no password protection - sub-domains are accessible to anyone '.
 	'who knows the domain name you\'ve chosen, but we do not publish a list of domains used.');
 
 	h1('Subdomains for your language...');
 
-	p('If a subdomain matches a language name, the required syntax highlighting is selected '.
+	p('If a sub-domain matches a language name, the required syntax highlighting is selected '.
 	'for you, so ruby.' . $CONF['basedomain'] . ' will preselect Ruby automatically. ');
 
 	echo '<p>';
@@ -496,6 +496,27 @@ echo '<label id="expiry_forever_label" for="expiry_forever">' . t('forever') . '
 <div id="expiryinfo"></div>
 
 </div>
+
+
+<div id="privatebox">
+
+
+<div id="privateradios">
+<label><?php echo t('Private?') ?></label><br/>
+
+<input type="radio" id="private_yes" name="private" value="y" <?php if ($page['private']=='y') echo 'checked="checked"'; ?> />
+<label id="private_yes_label" for="private_yes"><?php echo t('yes') ?></label>
+
+<input type="radio" id="private_no" name="private" value="n" <?php if ($page['private']=='n') echo 'checked="checked"'; ?> />
+<label id="private_no_label" for="private_no"><?php echo t('no') ?></label>
+
+</div>
+
+<div id="privateinfo"></div>
+
+</div>
+
+
 
 <div id="email">
 <input type="text" size="8" name="email" value="" />

@@ -143,7 +143,7 @@ class DB
 	* Add post and return id
 	* access public
 	*/
-	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$token)
+	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$token)
 	{
 		//figure out expiry time
 		switch ($expiry_flag)
@@ -175,6 +175,7 @@ class DB
 		$post['code']=$code;
 		$post['parent_pid']=$parent_pid;
 		$post['expiry_flag']=$expiry_flag;
+		$post['private_flag']=$private_flag;
 		$post['token']=$token;
 		$post['followups']=array();
 		$post['ip']=$_SERVER['REMOTE_ADDR'];
@@ -242,6 +243,7 @@ class DB
 		$mruentry['pid']=$id;
 		$mruentry['posted']=$post['posted'];
 		$mruentry['expires']=$post['expires'];
+		$mruentry['private']=$post['private_flag'];
 		$mruentry['poster']=$post['poster'];
 		$mruentry['domain']=$post['subdomain'];
 		//$mruentry['postdate']=strftime('%a %d %b %H:%M', $post['posted']);
@@ -494,6 +496,9 @@ class DB
 			foreach($mru as $idx=>$entry)
 			{
 				if (!$is_admin && ($entry['expires'] && ($now > $entry['expires'])))
+					continue;
+
+				if (!$is_admin && ($entry['private']!='n'))
 					continue;
 
 				if (!$is_admin && ($mru[$idx]['domain']!=$subdomain))

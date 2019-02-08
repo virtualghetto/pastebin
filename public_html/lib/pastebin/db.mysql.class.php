@@ -137,7 +137,7 @@ class DB extends MySQL
 	* Add post and return id
 	* access public
 	*/
-	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$token)
+	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$token)
 	{
 		$id="";
 		//figure out expiry time
@@ -172,9 +172,9 @@ class DB extends MySQL
 				$un=true;
 		}
 
-		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires,expiry_flag, ip) '.
-				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?)",
-				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $_SERVER['REMOTE_ADDR']);
+		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires, expiry_flag, private_flag, ip) '.
+				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?, ?)",
+				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $private_flag, $_SERVER['REMOTE_ADDR']);
 		//$id=$this->get_insert_id();
 
 		//add post to mru list - for small installations, this isn't really necessary
@@ -219,8 +219,8 @@ class DB extends MySQL
 		$posts=$this->_cachedquery($cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
 			"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
 			"from pastebin as p ".
-			"where p.domain=? ".
-			"order by p.posted desc, p.pid desc $limit", $subdomain);
+			"where p.domain=? and p.private_flag=? ".
+			"order by p.posted desc, p.pid desc $limit", $subdomain, 'n');
 
 		return $posts;
 	}
@@ -233,8 +233,8 @@ class DB extends MySQL
 		$this->query("select pid,poster,unix_timestamp()-unix_timestamp(posted) as age, ".
 			"date_format(posted, '%a %D %b %H:%i') as postdate ".
 			"from pastebin ".
-			"where domain=? ".
-			"order by posted desc, pid desc $limit", $subdomain);
+			"where domain=? and private_flag=? ".
+			"order by posted desc, pid desc $limit", $subdomain, 'n');
 		while ($this->next_record())
 		{
 			$posts[]=$this->row;
@@ -448,6 +448,7 @@ class DB extends MySQL
 			`posted` datetime default NULL,
 			`parent_pid` varchar(11) NOT NULL default '0',
 			`expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
+			`private_flag` ENUM('y', 'n') NOT NULL DEFAULT 'n',
 			`expires` DATETIME,
 			`format` varchar(16) default NULL,
 			`code` text,
