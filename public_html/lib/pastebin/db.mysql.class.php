@@ -192,8 +192,17 @@ class DB extends MySQL
 	*/
 	function getPost($id, $subdomain)
 	{
-		$this->query('select *,date_format(posted, \'%a %D %b %H:%i\') as postdate '.
-			'from pastebin where pid=? and domain=?', $id, $subdomain);
+		global $is_admin;
+
+		if($is_admin)
+		{
+			$this->query('select *,date_format(posted, \'%a %D %b %H:%i\') as postdate '.
+				'from pastebin where pid=?', $id);
+		}else {
+			$this->query('select *,date_format(posted, \'%a %D %b %H:%i\') as postdate '.
+				'from pastebin where pid=? and domain=?', $id, $subdomain);
+		}
+
 		if ($this->next_record())
 			return $this->row;
 		else
@@ -207,6 +216,8 @@ class DB extends MySQL
 	*/
 	function getRecentPostSummary($subdomain, $count)
 	{
+		global $is_admin;
+
 		if (strlen($subdomain))
 			return $this->searchRecentPostSummary($subdomain, $count);
 
@@ -216,25 +227,41 @@ class DB extends MySQL
 
 		$cacheid="recent".$subdomain;
 
-		$posts=$this->_cachedquery($cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
-			"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
-			"from pastebin as p ".
-			"where p.domain=? and p.private_flag=? ".
-			"order by p.posted desc, p.pid desc $limit", $subdomain, 'n');
+		if($is_admin) {
+			$posts=$this->_cachedquery($cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
+				"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
+				"from pastebin as p ".
+				"order by p.posted desc, p.pid desc $limit");
+		}else{
+			$posts=$this->_cachedquery($cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
+				"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
+				"from pastebin as p ".
+				"where p.domain=? and p.private_flag=? ".
+				"order by p.posted desc, p.pid desc $limit", $subdomain, 'n');
+		}
 
 		return $posts;
 	}
 
 	function searchRecentPostSummary($subdomain, $count)
 	{
+		global $is_admin;
+
 		$limit=$count?"limit $count":"";
 
 		$posts=array();
-		$this->query("select pid,poster,unix_timestamp()-unix_timestamp(posted) as age, ".
-			"date_format(posted, '%a %D %b %H:%i') as postdate ".
-			"from pastebin ".
-			"where domain=? and private_flag=? ".
-			"order by posted desc, pid desc $limit", $subdomain, 'n');
+		if($is_admin){
+			$this->query("select pid,poster,unix_timestamp()-unix_timestamp(posted) as age, ".
+				"date_format(posted, '%a %D %b %H:%i') as postdate ".
+				"from pastebin ".
+				"order by posted desc, pid desc $limit");
+		}else{
+			$this->query("select pid,poster,unix_timestamp()-unix_timestamp(posted) as age, ".
+				"date_format(posted, '%a %D %b %H:%i') as postdate ".
+				"from pastebin ".
+				"where domain=? and private_flag=? ".
+				"order by posted desc, pid desc $limit", $subdomain, 'n');
+		}
 		while ($this->next_record())
 		{
 			$posts[]=$this->row;
