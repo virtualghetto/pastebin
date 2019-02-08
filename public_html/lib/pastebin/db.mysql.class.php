@@ -172,9 +172,9 @@ class DB extends MySQL
 				$un=true;
 		}
 
-		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires, expiry_flag, private_flag, ip) '.
-				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?, ?)",
-				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $private_flag, $_SERVER['REMOTE_ADDR']);
+		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires, expiry_flag, private_flag, token, ip) '.
+				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?, ?, ?)",
+				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $private_flag, $token, $_SERVER['REMOTE_ADDR']);
 		//$id=$this->get_insert_id();
 
 		//add post to mru list - for small installations, this isn't really necessary
@@ -481,6 +481,7 @@ class DB extends MySQL
 			`code` text,
 			`codefmt` mediumtext,
 			`codecss` text,
+			`token` varchar(32) default NULL,
 			`ip` varchar(15) default NULL,
 
 			PRIMARY KEY  (`pid`),

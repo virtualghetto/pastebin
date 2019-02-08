@@ -243,7 +243,7 @@ $page=array();
 $page['current_format']=$CONF['default_highlighter'];
 $page['expiry']=$CONF['default_expiry'];
 $page['private']='n';
-$page['remember']='';
+$page['remember']='checked="checked"';
 
 //see if we can come up with a better default using the subdomain
 if (strlen($CONF['subdomain']) && isset($CONF['all_syntax'][$CONF['subdomain']]))

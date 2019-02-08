@@ -64,6 +64,7 @@ CREATE TABLE `pastebin` (
 	  `code` text,
 	  `codefmt` mediumtext,
 	  `codecss` text,
+	  `token` varchar(32) default NULL,
 	  `ip` varchar(15) default NULL,
 	  
 	  PRIMARY KEY  (`pid`),
