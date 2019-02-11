@@ -473,7 +473,7 @@ class DB extends MySQL
 			`domain` varchar(255) default '',
 			`poster` varchar(16) default NULL,
 			`posted` datetime default NULL,
-			`parent_pid` varchar(11) NOT NULL default '0',
+			`parent_pid` varchar(11) NOT NULL default '',
 			`expiry_flag` ENUM('h', 'd','m', 'f') NOT NULL DEFAULT 'm',
 			`private_flag` ENUM('y', 'n') NOT NULL DEFAULT 'n',
 			`expires` DATETIME,

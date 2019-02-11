@@ -215,7 +215,7 @@ class Pastebin
 
 				//now insert..
 				$parent_pid='';
-				if (isset($post['parent_pid']))
+				if (isset($post['parent_pid']) && strlen($post['parent_pid']))
 					$parent_pid=$this->cleanPostId($post['parent_pid']);
 
 				$id=$this->db->addPost($post['poster'],$this->conf['subdomain'],$format,$code,
@@ -391,7 +391,7 @@ class Pastebin
 			//show a quick reference url, poster and parents
 			$post['posttitle']="Posted by {$post['poster']} on {$post['postdate']}";
 
-			if ($post['parent_pid']!='0')
+			if (isset($post['parent_pid']) && strlen($post['parent_pid']))
 			{
 				$parent_pid=$post['parent_pid'];
 
@@ -407,6 +407,8 @@ class Pastebin
 					$post['parent_postdate']=$parent['postdate'];
 					$post['parent_diffurl']=$this->conf['this_script']."?diff=$pid";
 
+				}else {
+					$post['parent_pid']='';
 				}
 			}
 

@@ -160,7 +160,7 @@ if (isset($_REQUEST["diff"]))
 	$newpid=$pastebin->cleanPostId($_REQUEST['diff']);
 
 	$newpost=$pastebin->getPost($newpid);
-	if (isset($newpost['parent_pid']) && $newpost['parent_pid']!='0')
+	if (isset($newpost['parent_pid']) && strlen($newpost['parent_pid']))
 	{
 		$oldpost=$pastebin->getPost($newpost['parent_pid']);
 		if (isset($oldpost['pid']))
@@ -215,7 +215,7 @@ if (isset($_GET['help']))
 if (!empty($page['post']['posttitle']))
 {
 		echo "<h1>{$page['post']['posttitle']}";
-		if (strlen($page['post']['parent_pid']))
+		if (isset($page['post']['parent_pid']) && strlen($page['post']['parent_pid']))
 		{
 			if (isset($page['post']['parent_url']) && isset($page['post']['parent_poster']) && isset($page['post']['parent_diffurl'])){
 			echo ' (';
@@ -254,7 +254,7 @@ if (!empty($page['post']['posttitle']))
 		}
 
 		/*
-		if ($page['post']['parent_pid']>0)
+		if (isset($page['post']['parent_pid']) && strlen($page['post']['parent_pid']))
 		{
 			echo "<a href=\"{$page['post']['parent_diffurl']}\" title=\"".t('compare differences')."\">".t('diff')."</a> | ";
 		}
