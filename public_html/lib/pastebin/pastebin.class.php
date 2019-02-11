@@ -163,10 +163,10 @@ class Pastebin
 		$this->errors=array();
 
 		//validate some inputs
-		$post['poster']=$this->_cleanUsername($post['poster']);
-		$post['format']=$this->_cleanFormat($post['format']);
-		$post['expiry']=$this->_cleanExpiry($post['expiry']);
-		$post['private']=$this->_cleanPrivate($post['private']);
+		$post['poster']=isset($post['poster']) ? $this->_cleanUsername($post['poster']) : '';
+		$post['format']=isset($post['format']) ? $this->_cleanFormat($post['format']) : 'text';
+		$post['expiry']=isset($post['expiry']) ? $this->_cleanExpiry($post['expiry']) : 'm';
+		$post['private']=isset($post['private']) ? $this->_cleanPrivate($post['private']) : 'n';
 
 		//get a token we'll use to remember this post
 		$post['token']=isset($_COOKIE['persistToken'])?

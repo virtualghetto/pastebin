@@ -369,6 +369,7 @@ class DB extends MySQL
 		//try and get a lock
 		$lock = $cachefile.'.lock';
 		$lf = @fopen ($lock, 'x');
+		$i=0;
 		while (($lf === FALSE) && ($i++ < 20))
 		{
 			clearstatcache();
