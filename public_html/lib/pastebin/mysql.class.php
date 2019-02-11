@@ -45,7 +45,7 @@ class MySQL
 	{
 		global $CONF;
 		$this->dblink=mysqli_connect(
-			'p:' . $CONF["dbhost"],
+			$CONF["dbhost"],
 			$CONF["dbuser"],
 			$CONF["dbpass"],
 			$CONF["dbname"])
