@@ -195,7 +195,7 @@ class Pastebin
 				setcookie ('persistName', '', 0);
 		}
 
-		if (strlen($post['code2']))
+		if (isset($post['code2']) && strlen($post['code2']))
 		{
 			if (strlen($post['poster'])==0)
 				$post['poster']='Anonymous';
