@@ -68,6 +68,7 @@ class DB extends MySQL
 
 		//delete expired posts
 		$this->_deleteExpiredPosts();
+		$this->_cacheflush('recent'.$CONF['subdomain']);
 
 	}
 
@@ -126,10 +127,11 @@ class DB extends MySQL
 	/**
 	* erase a post
 	*/
-	function deletePost($pid, $delete_linked=false, $depth=0)
+	function deletePost($pid, $subdomain, $delete_linked=false, $depth=0)
 	{
 		$this->query('delete from pastebin where pid=?', $pid);
 		$this->query('delete from abuse where pid=?', $pid);
+		$this->_cacheflush('recent'.$subdomain);
 		return true;
 	}
 

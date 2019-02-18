@@ -170,7 +170,7 @@ class DB
 		$post['posted']=$this->now();
 		$post['expires']=$expires;
 		$post['poster']=$poster;
-		$post['subdomain']=$subdomain;
+		$post['domain']=$subdomain;
 		$post['format']=$format;
 		$post['code']=$code;
 		$post['parent_pid']=$parent_pid;
@@ -245,7 +245,7 @@ class DB
 		$mruentry['expires']=$post['expires'];
 		$mruentry['private']=$post['private_flag'];
 		$mruentry['poster']=$post['poster'];
-		$mruentry['domain']=$post['subdomain'];
+		$mruentry['domain']=$post['domain'];
 		//$mruentry['postdate']=strftime('%a %d %b %H:%M', $post['posted']);
 
 		$mrufile=$this->_domainToPath($subdomain);
@@ -407,7 +407,7 @@ class DB
 	 /**
 	* erase a post
 	*/
-	function deletePost($pid, $delete_linked=false, $depth=0)
+	function deletePost($pid, $subdomain, $delete_linked=false, $depth=0)
 	{
 		$file=$this->_idToPath($pid, false);
 		$ok=file_exists($file);
@@ -419,7 +419,7 @@ class DB
 			{
 				foreach($post['followups'] as $idx=>$followup)
 				{
-					$this->deletePost($followup['pid'], true, $depth+1);
+					$this->deletePost($followup['pid'], $subdomain, true, $depth+1);
 				}
 			}
 
@@ -428,7 +428,7 @@ class DB
 
 			//update mru too?
 			if ($depth==0)
-			   $this->_cleanMRU($post['subdomain'], $pid);
+			   $this->_cleanMRU($post['domain'], $pid);
 		}
 
 		return $ok;
@@ -454,7 +454,7 @@ class DB
 
 			//check domain - only an admin can view a post on the
 			//'wrong' domain
-			if (!$is_admin && ($rec['subdomain']!=$subdomain))
+			if (!$is_admin && ($rec['domain']!=$subdomain))
 			{
 				$rec=false;
 			}
@@ -463,7 +463,7 @@ class DB
 			if ($rec['expires'] && ($this->now() > $rec['expires']))
 			{
 				$rec=false;
-				//$this->deletePost($id, false);
+				//$this->deletePost($id, $subdomain, false);
 			}
 
 

@@ -376,7 +376,11 @@ class Pastebin
 
 	function deletePost($pid, $delete_linked=false)
 	{
-		return $this->db->deletePost($pid, $delete_linked);
+		$post=$this->db->getPost($pid, $this->conf['subdomain']);
+		if ($post) {
+			return $this->db->deletePost($pid, $post['domain'], $delete_linked);
+		}
+		return false;
 	}
 
 	/**
