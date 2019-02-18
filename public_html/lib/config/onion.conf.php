@@ -138,6 +138,11 @@ $CONF['base_domain_elements']=2;
 $CONF['maintainer_mode']=false;
 
 /**
+* Cache recent results
+*/
+$CONF['cache_recent']=true;
+
+/**
 * default syntax highlighter
 */
 $CONF['default_highlighter']='text';

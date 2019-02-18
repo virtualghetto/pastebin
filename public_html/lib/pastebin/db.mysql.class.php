@@ -217,6 +217,7 @@ class DB extends MySQL
 	function getRecentPostSummary($subdomain, $count)
 	{
 		global $is_admin;
+		global $CONF;
 
 		if (strlen($subdomain))
 			return $this->searchRecentPostSummary($subdomain, $count);
@@ -228,12 +229,12 @@ class DB extends MySQL
 		$cacheid="recent".$subdomain;
 
 		if($is_admin) {
-			$posts=$this->_cachedquery($cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
+			$posts=$this->_cachedquery(false, $cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
 				"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
 				"from pastebin as p ".
 				"order by p.posted desc, p.pid desc $limit");
 		}else{
-			$posts=$this->_cachedquery($cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
+			$posts=$this->_cachedquery($CONF['cache_recent'], $cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
 				"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
 				"from pastebin as p ".
 				"where p.domain=? and p.private_flag=? ".
@@ -312,15 +313,19 @@ class DB extends MySQL
 		}
 	}
 
-	function _cachedquery($cacheid, $sql)
+	function _cachedquery($docache, $cacheid, $sql)
 	{
 		$cachefile=$this->cachedir.$cacheid;
-		if (file_exists($cachefile))
+
+		if ($docache)
 		{
-			$serialized=@file_get_contents($cachefile);
-			if (strlen($serialized))
+			if (file_exists($cachefile))
 			{
-				return unserialize($serialized);
+				$serialized=@file_get_contents($cachefile);
+				if (strlen($serialized))
+				{
+					return unserialize($serialized);
+				}
 			}
 		}
 
@@ -329,7 +334,7 @@ class DB extends MySQL
 
 		//cache miss
 		//been passed more parameters? do some smart replacement
-		if (func_num_args() > 2)
+		if (func_num_args() > 3)
 		{
 			//query contains ? placeholders, but it's possible the
 			//replacement string have ? in too, so we replace them in
@@ -338,7 +343,7 @@ class DB extends MySQL
 			$sql=str_replace('?', $q, $sql);
 
 			$args=func_get_args();
-			for ($i=2; $i<count($args); $i++)
+			for ($i=3; $i<count($args); $i++)
 			{
 				$sql=preg_replace("/$q/", "'".preg_quote(mysqli_real_escape_string($this->dblink, $args[$i]))."'", $sql,1);
 
@@ -363,29 +368,32 @@ class DB extends MySQL
 
 
 
-		//we have our result
-		$serialized=serialize($result);
-
-		//try and get a lock
-		$lock = $cachefile.'.lock';
-		$lf = @fopen ($lock, 'x');
-		$i=0;
-		while (($lf === FALSE) && ($i++ < 20))
+		if ($docache)
 		{
-			clearstatcache();
-			usleep(rand(5,85));
+			//we have our result
+			$serialized=serialize($result);
+
+			//try and get a lock
+			$lock = $cachefile.'.lock';
 			$lf = @fopen ($lock, 'x');
-		}
+			$i=0;
+			while (($lf === FALSE) && ($i++ < 20))
+			{
+				clearstatcache();
+				usleep(rand(5,85));
+				$lf = @fopen ($lock, 'x');
+			}
 
-		//did we get the lock?
-		if ($lf !== FALSE) {
-			$fp = fopen($cachefile, 'w');
-				fwrite( $fp, $serialized);
-			fclose( $fp);
+			//did we get the lock?
+			if ($lf !== FALSE) {
+				$fp = fopen($cachefile, 'w');
+					fwrite( $fp, $serialized);
+				fclose( $fp);
 
-			//unlock
-			fclose($lf);
-			unlink($lock);
+				//unlock
+				fclose($lf);
+				unlink($lock);
+			}
 		}
 
 		return $result;
