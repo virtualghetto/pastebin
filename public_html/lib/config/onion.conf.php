@@ -143,6 +143,11 @@ $CONF['maintainer_mode']=false;
 $CONF['cache_recent']=true;
 
 /**
+* Number of recent results
+*/
+$CONF['list_recent']=10;
+
+/**
 * default syntax highlighter
 */
 $CONF['default_highlighter']='text';

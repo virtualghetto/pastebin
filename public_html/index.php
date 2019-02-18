@@ -410,7 +410,7 @@ if (isset($_POST['abuse']))
 
 
 //add list of recent posts
-$list=isset($_REQUEST["list"]) ? intval($_REQUEST["list"]) : 10;
+$list=isset($_REQUEST["list"]) ? intval($_REQUEST["list"]) : $CONF['list_recent'];
 $page['recent']=$pastebin->getRecentPosts($list);
 $page['abuse']=$pastebin->getAbusePosts();
 
