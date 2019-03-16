@@ -153,6 +153,7 @@ class DB extends MySQL
 				break;
 			case 'f';
 				$expires="NULL";
+				break;
 			default:
 			case 'm';
 				$expires="DATE_ADD(NOW(), INTERVAL 1 MONTH)";
