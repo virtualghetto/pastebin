@@ -210,7 +210,7 @@ class Pastebin
 			require_once('lib/pastebin/spamfilter.class.php');
 			$filter=new SpamFilter;
 
-			if ($filter->canPost($post))
+			if ($filter->canPost($post, $this))
 			{
 
 				//now insert..

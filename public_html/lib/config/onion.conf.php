@@ -130,6 +130,12 @@ $CONF['highlight_prefix']='@@';
 */
 $CONF['base_domain_elements']=2;
 
+/**
+* if defined forces the use of this request scheme
+* otherwise determined by $_SERVER['HTTPS']
+* values can be http or https
+*/
+//$CONF['force_scheme']='https';
 
 /**
 * maintainer mode enables some code used to aid translation - unless you
