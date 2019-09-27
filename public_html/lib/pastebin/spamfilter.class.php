@@ -9,14 +9,11 @@ class SpamFilter
 {
 	public function canPost($post, $pb)
 	{
-		$parent_pid='';
-		if (isset($post['parent_pid']) && strlen($post['parent_pid']))
+		if($pb->isDuplicate($post['hash'], $post['domain']))
 		{
-			$parent_pid=$pb->cleanPostId($post['parent_pid']);
-			$parent_post=$pb->getPost($parent_pid);
-			if(strcmp($parent_post['code'], $post['code2']) == 0)
-				return false;
+			return false;
 		}
+
 		return true;
 	}
 

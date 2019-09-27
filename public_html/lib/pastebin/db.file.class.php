@@ -143,7 +143,7 @@ class DB
 	* Add post and return id
 	* access public
 	*/
-	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$token)
+	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$hash,$token)
 	{
 		//figure out expiry time
 		switch ($expiry_flag)
@@ -176,6 +176,7 @@ class DB
 		$post['parent_pid']=$parent_pid;
 		$post['expiry_flag']=$expiry_flag;
 		$post['private_flag']=$private_flag;
+		$post['hash']=$hash;
 		$post['token']=$token;
 		$post['followups']=array();
 		$post['ip']=$_SERVER['REMOTE_ADDR'];
@@ -245,6 +246,7 @@ class DB
 		$mruentry['expires']=$post['expires'];
 		$mruentry['private']=$post['private_flag'];
 		$mruentry['poster']=$post['poster'];
+		$mruentry['hash']=$post['hash'];
 		$mruentry['domain']=$post['domain'];
 		//$mruentry['postdate']=strftime('%a %d %b %H:%M', $post['posted']);
 
@@ -432,6 +434,25 @@ class DB
 		}
 
 		return $ok;
+	}
+
+	function isDuplicate($hash, $subdomain)
+	{
+		$mrufile=$this->_domainToPath($subdomain);
+		if (file_exists($mrufile))
+		{
+			$mru=unserialize(file_get_contents($mrufile));
+			$smru = array();
+
+			foreach($mru as $idx=>$entry)
+			{
+				if ($entry['hash'] == $hash && $entry['domain'] == $subdomain && $entry['private'] == 'n')
+					return true;
+
+			}
+		}
+
+		return false;
 	}
 
 	 /**

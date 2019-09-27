@@ -139,7 +139,7 @@ class DB extends MySQL
 	* Add post and return id
 	* access public
 	*/
-	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$token)
+	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$hash,$token)
 	{
 		$id="";
 		//figure out expiry time
@@ -175,9 +175,9 @@ class DB extends MySQL
 				$un=true;
 		}
 
-		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires, expiry_flag, private_flag, token, ip) '.
-				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?, ?, ?)",
-				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $private_flag, $token, $_SERVER['REMOTE_ADDR']);
+		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires, expiry_flag, private_flag, hash, token, ip) '.
+				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?, ?, ?, ?)",
+				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $private_flag, $hash, $token, $_SERVER['REMOTE_ADDR']);
 		//$id=$this->get_insert_id();
 
 		//add post to mru list - for small installations, this isn't really necessary
@@ -187,6 +187,22 @@ class DB extends MySQL
 		$this->_cacheflush('recent'.$subdomain);
 
 		return $id;
+	}
+
+	function _getDupCount($hash, $subdomain)
+	{
+		$this->query('select count(*) as cnt from pastebin where hash is not null and hash=? and domain=? and private_flag=?', $hash, $subdomain, 'n');
+		return $this->next_record() ? $this->f('cnt') : 0;
+	}
+
+	function isDuplicate($hash, $subdomain)
+	{
+		$dup_count=$this->_getDupCount($hash, $subdomain);
+		if ($dup_count>0)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	 /**
@@ -493,6 +509,7 @@ class DB extends MySQL
 			`code` text,
 			`codefmt` mediumtext,
 			`codecss` text,
+			`hash` varchar(128) default NULL,
 			`token` varchar(32) default NULL,
 			`ip` varchar(15) default NULL,
 

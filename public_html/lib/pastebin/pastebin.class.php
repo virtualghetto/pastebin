@@ -205,6 +205,8 @@ class Pastebin
 				$format='';
 
 			$code=$post['code2'];
+			$post['hash']=md5($post['code2']);
+			$post['domain']=$this->conf['subdomain'];
 
 			//is it spam?
 			require_once('lib/pastebin/spamfilter.class.php');
@@ -218,8 +220,8 @@ class Pastebin
 				if (isset($post['parent_pid']) && strlen($post['parent_pid']))
 					$parent_pid=$this->cleanPostId($post['parent_pid']);
 
-				$id=$this->db->addPost($post['poster'],$this->conf['subdomain'],$format,$code,
-					$parent_pid,$post['expiry'],$post['private'],$post['token']);
+				$id=$this->db->addPost($post['poster'],$post['domain'],$format,$code,
+					$parent_pid,$post['expiry'],$post['private'],$post['hash'], $post['token']);
 			}
 			else
 			{
@@ -507,6 +509,11 @@ class Pastebin
 		}
 
 		return $post;
+	}
+
+	function isDuplicate($hash, $domain)
+	{
+		return $this->db->isDuplicate($hash, $domain);
 	}
 
 	function doAbusePost($pid, $msg)
