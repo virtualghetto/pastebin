@@ -410,7 +410,11 @@ if (isset($_POST['abuse']))
 
 
 //add list of recent posts
-$list=isset($_REQUEST["list"]) ? intval($_REQUEST["list"]) : $CONF['list_recent'];
+if ($is_admin)
+	$list=isset($_REQUEST["list"]) ? intval($_REQUEST["list"]) : 0;
+else
+	$list=isset($_REQUEST["list"]) ? intval($_REQUEST["list"]) : $CONF['list_recent'];
+
 $page['recent']=$pastebin->getRecentPosts($list);
 $page['abuse']=$pastebin->getAbusePosts();
 
@@ -458,7 +462,7 @@ if (isset($_REQUEST["show"]))
 	$page['can_erase']=(isset($page['post']['token']) && isset($page['token']) && ($page['token']==$page['post']['token']));
 
 	//admin can always erase
-	if (isset($_COOKIE['admin']) && ($_COOKIE['admin']==md5($CONF['admin'])))
+	if ($is_admin)
 		$page['can_erase']=true;
 
 	//ensure corrent format is selected
