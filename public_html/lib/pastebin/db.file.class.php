@@ -455,6 +455,29 @@ class DB
 		return false;
 	}
 
+	function getHashPost($hash, $subdomain)
+	{
+		$mrufile=$this->_domainToPath($subdomain);
+		$id = NULL;
+		if (file_exists($mrufile))
+		{
+			$mru=unserialize(file_get_contents($mrufile));
+			$smru = array();
+
+			foreach($mru as $idx=>$entry)
+			{
+				if ($entry['hash'] == $hash && $entry['domain'] == $subdomain)
+				{
+					$id = $entry['pid'];
+					break;
+				}
+
+			}
+		}
+
+		return $id;
+	}
+
 	 /**
 	* Return entire pastebin row for given id/subdomdain
 	* access public

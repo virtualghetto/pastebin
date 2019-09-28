@@ -205,6 +205,19 @@ class DB extends MySQL
 		return false;
 	}
 
+	function getHashPost($hash, $subdomain)
+	{
+		$this->query('select pid '.
+				'from pastebin where hash=? and domain=?', $hash, $subdomain);
+
+		if ($this->next_record())
+			$id = $this->f('pid');
+		else
+			$id = NULL;
+
+		return $id;
+	}
+
 	 /**
 	* Return entire pastebin row for given id/subdomdain
 	* access public

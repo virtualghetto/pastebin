@@ -226,6 +226,7 @@ class Pastebin
 			else
 			{
 				$this->errors[]='Sorry, your post tripped our spam/abuse filter - let us know if you think this could be improved';
+				$id=$this->db->getHashPost($post['hash'],$post['domain']);
 			}
 
 		}
