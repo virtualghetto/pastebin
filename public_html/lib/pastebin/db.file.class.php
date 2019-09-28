@@ -143,7 +143,7 @@ class DB
 	* Add post and return id
 	* access public
 	*/
-	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$hash,$token)
+	function addPost($poster,$domain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$hash,$token)
 	{
 		//figure out expiry time
 		switch ($expiry_flag)
@@ -170,7 +170,7 @@ class DB
 		$post['posted']=$this->now();
 		$post['expires']=$expires;
 		$post['poster']=$poster;
-		$post['domain']=$subdomain;
+		$post['domain']=$domain;
 		$post['format']=$format;
 		$post['code']=$code;
 		$post['parent_pid']=$parent_pid;
@@ -218,7 +218,7 @@ class DB
 					flock($fp, LOCK_EX);
 
 					//read and update post
-					$parent=$this->getPost($post['parent_pid'], $subdomain);
+					$parent=$this->getPost($post['parent_pid'], $domain);
 					$parent['followups'][]=$followup;
 
 					$fp2=@fopen ($file, 'w');
@@ -250,9 +250,9 @@ class DB
 		$mruentry['domain']=$post['domain'];
 		//$mruentry['postdate']=strftime('%a %d %b %H:%M', $post['posted']);
 
-		$mrufile=$this->_domainToPath($subdomain);
+		$mrufile=$this->_domainToPath($domain);
 
-		//$this->_cleanMRU($subdomain);
+		//$this->_cleanMRU($domain);
 
 		//get a lock on the file before attempting anything...
 		$fp=fopen($mrufile, 'a+');
@@ -319,9 +319,9 @@ class DB
 			return "";
 	}
 
-	function _cleanMRU($subdomain, $deleteid="")
+	function _cleanMRU($domain, $deleteid="")
 	{
-		$mrufile=$this->_domainToPath($subdomain);
+		$mrufile=$this->_domainToPath($domain);
 
 		//get a lock on the file before attempting anything...
 		$fp=@fopen($mrufile, 'r');
@@ -409,7 +409,7 @@ class DB
 	 /**
 	* erase a post
 	*/
-	function deletePost($pid, $subdomain, $delete_linked=false, $depth=0)
+	function deletePost($pid, $domain, $delete_linked=false, $depth=0)
 	{
 		$file=$this->_idToPath($pid, false);
 		$ok=file_exists($file);
@@ -421,7 +421,7 @@ class DB
 			{
 				foreach($post['followups'] as $idx=>$followup)
 				{
-					$this->deletePost($followup['pid'], $subdomain, true, $depth+1);
+					$this->deletePost($followup['pid'], $domain, true, $depth+1);
 				}
 			}
 
@@ -436,9 +436,9 @@ class DB
 		return $ok;
 	}
 
-	function isDuplicate($hash, $subdomain)
+	function isDuplicate($hash, $domain)
 	{
-		$mrufile=$this->_domainToPath($subdomain);
+		$mrufile=$this->_domainToPath($domain);
 		if (file_exists($mrufile))
 		{
 			$mru=unserialize(file_get_contents($mrufile));
@@ -446,7 +446,7 @@ class DB
 
 			foreach($mru as $idx=>$entry)
 			{
-				if ($entry['hash'] == $hash && $entry['domain'] == $subdomain && $entry['private'] == 'n')
+				if ($entry['hash'] == $hash && $entry['domain'] == $domain && $entry['private'] == 'n')
 					return true;
 
 			}
@@ -455,9 +455,9 @@ class DB
 		return false;
 	}
 
-	function getHashPost($hash, $subdomain)
+	function getHashPost($hash, $domain)
 	{
-		$mrufile=$this->_domainToPath($subdomain);
+		$mrufile=$this->_domainToPath($domain);
 		$id = NULL;
 		if (file_exists($mrufile))
 		{
@@ -466,7 +466,7 @@ class DB
 
 			foreach($mru as $idx=>$entry)
 			{
-				if ($entry['hash'] == $hash && $entry['domain'] == $subdomain)
+				if ($entry['hash'] == $hash && $entry['domain'] == $domain)
 				{
 					$id = $entry['pid'];
 					break;
@@ -482,7 +482,7 @@ class DB
 	* Return entire pastebin row for given id/subdomdain
 	* access public
 	*/
-	function getPost($id, $subdomain)
+	function getPost($id, $domain)
 	{
 		global $is_admin;
 
@@ -498,7 +498,7 @@ class DB
 
 			//check domain - only an admin can view a post on the
 			//'wrong' domain
-			if (!$is_admin && ($rec['domain']!=$subdomain))
+			if (!$is_admin && ($rec['domain']!=$domain))
 			{
 				$rec=false;
 			}
@@ -507,7 +507,7 @@ class DB
 			if ($rec['expires'] && ($this->now() > $rec['expires']))
 			{
 				$rec=false;
-				//$this->deletePost($id, $subdomain, false);
+				//$this->deletePost($id, $domain, false);
 			}
 
 
@@ -525,11 +525,11 @@ class DB
 	* Return summaries for $count posts ($count=0 means all)
 	* access public
 	*/
-	function getRecentPostSummary($subdomain, $count)
+	function getRecentPostSummary($domain, $count)
 	{
 		global $is_admin;
 
-		$mrufile=$this->_domainToPath($subdomain);
+		$mrufile=$this->_domainToPath($domain);
 		if (file_exists($mrufile))
 		{
 			$mru=unserialize(file_get_contents($mrufile));
@@ -545,7 +545,7 @@ class DB
 				if (!$is_admin && ($entry['private']!='n'))
 					continue;
 
-				if (!$is_admin && ($mru[$idx]['domain']!=$subdomain))
+				if (!$is_admin && ($mru[$idx]['domain']!=$domain))
 					continue;
 
 				$mru[$idx]['age']=$now-$entry['posted'];
@@ -647,20 +647,20 @@ class DB
 		return "";
 	}
 
-	function addAbusePost($pid,$subdomain,$msg)
+	function addAbusePost($pid,$domain,$msg)
 	{
-		//if(strlen(trim($subdomain)))
-		//	$subdomain = '.' . $subdomain;
+		//if(strlen(trim($domain)))
+		//	$domain = '.' . $domain;
 
                 //new method...write info file to abuse folder
-                //$file=$_SERVER['DOCUMENT_ROOT']."/lib/abuse/$pid".$subdomain;
+                //$file=$_SERVER['DOCUMENT_ROOT']."/lib/abuse/$pid".$domain;
                 $file=$_SERVER['DOCUMENT_ROOT']."/lib/abuse/$pid";
                 $fp=fopen($file, 'a+');
                 fwrite($fp, $msg);
                 fclose($fp);
 	}
 
-	function getAbusePostSummary($subdomain)
+	function getAbusePostSummary($domain)
 	{
 
 		global $is_admin;
@@ -689,7 +689,7 @@ class DB
 
 				if (file_exists($file))
 				{
-					//if (strcmp($subdomain, $sb))
+					//if (strcmp($domain, $sb))
 					//	continue;
 
 					$abuseentry=array();
@@ -708,7 +708,7 @@ class DB
 		return $abuse;
 	}
 
-	function getAbusePost($id, $subdomain)
+	function getAbusePost($id, $domain)
 	{
 		global $is_admin;
 
@@ -717,10 +717,10 @@ class DB
 		if (!$is_admin)
 			return $abuse;
 
-		//if(strlen(trim($subdomain)))
-		//	$subdomain = '.' . $subdomain;
+		//if(strlen(trim($domain)))
+		//	$domain = '.' . $domain;
 
-		//$abusefile=$_SERVER['DOCUMENT_ROOT'].'/lib/abuse/'. $id . $subdomain;
+		//$abusefile=$_SERVER['DOCUMENT_ROOT'].'/lib/abuse/'. $id . $domain;
 		$abusefile=$_SERVER['DOCUMENT_ROOT'].'/lib/abuse/'. $id;
 		if (file_exists($abusefile))
 		{

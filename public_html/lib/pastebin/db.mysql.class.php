@@ -54,44 +54,46 @@ class DB extends MySQL
 	function gc()
 	{
 		global $CONF;
+		$domain = $CONF['subdomain'];
+		$max_posts = $CONF['max_posts'];
 
 
 		//is there a limit on the number of posts
-		if ($CONF['max_posts'])
+		if ($max_posts)
 		{
-			$delete_count=$this->_getPostCount($CONF['subdomain'])-$CONF['max_posts'];
+			$delete_count=$this->_getPostCount($domain)-$max_posts;
 			if ($delete_count>0)
 			{
-				$this->_trimDomainPosts($CONF['subdomain'], $delete_count);
+				$this->_trimDomainPosts($domain, $delete_count);
 			}
 		}
 
 		//delete expired posts
 		$this->_deleteExpiredPosts();
-		$this->_cacheflush('recent'.$CONF['subdomain']);
+		$this->_cacheflush('recent'.$domain);
 
 	}
 
 	/**
-	* How many posts on domain $subdomain?
+	* How many posts on domain?
 	* access private
 	*/
-	function _getPostCount($subdomain)
+	function _getPostCount($domain)
 	{
-		$this->query('select count(*) as cnt from pastebin where domain=?', $subdomain);
+		$this->query('select count(*) as cnt from pastebin where domain=?', $domain);
 		return $this->next_record() ? $this->f('cnt') : 0;
 	}
 
 	/**
-	* Delete oldest $deletecount posts from $subdomain
+	* Delete oldest $deletecount posts from domain
 	* access private
 	*/
-	function _trimDomainPosts($subdomain, $deletecount)
+	function _trimDomainPosts($domain, $deletecount)
 	{
 		//build a one-shot statement to delete old posts
 		$sql='delete from pastebin where pid in (';
 		$sep='';
-		$this->query("select * from pastebin where domain=? order by posted asc limit $deletecount", $subdomain);
+		$this->query("select * from pastebin where domain=? order by posted asc limit $deletecount", $domain);
 		while ($this->next_record())
 		{
 			$sql.=$sep.$this->f('pid');
@@ -127,11 +129,11 @@ class DB extends MySQL
 	/**
 	* erase a post
 	*/
-	function deletePost($pid, $subdomain, $delete_linked=false, $depth=0)
+	function deletePost($pid, $domain, $delete_linked=false, $depth=0)
 	{
 		$this->query('delete from pastebin where pid=?', $pid);
 		$this->query('delete from abuse where pid=?', $pid);
-		$this->_cacheflush('recent'.$subdomain);
+		$this->_cacheflush('recent'.$domain);
 		return true;
 	}
 
@@ -139,7 +141,7 @@ class DB extends MySQL
 	* Add post and return id
 	* access public
 	*/
-	function addPost($poster,$subdomain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$hash,$token)
+	function addPost($poster,$domain,$format,$code,$parent_pid,$expiry_flag,$private_flag,$hash,$token)
 	{
 		$id="";
 		//figure out expiry time
@@ -177,27 +179,27 @@ class DB extends MySQL
 
 		$this->query('insert into pastebin (pid, poster, domain, posted, format, code, parent_pid, expires, expiry_flag, private_flag, hash, token, ip) '.
 				"values (?, ?, ?, now(), ?, ?, ?, $expires, ?, ?, ?, ?, ?)",
-				$id, $poster,$subdomain,$format,$code,$parent_pid, $expiry_flag, $private_flag, $hash, $token, $_SERVER['REMOTE_ADDR']);
+				$id, $poster,$domain,$format,$code,$parent_pid, $expiry_flag, $private_flag, $hash, $token, $_SERVER['REMOTE_ADDR']);
 		//$id=$this->get_insert_id();
 
 		//add post to mru list - for small installations, this isn't really necessary
 		//but once the pastebin table gets >10,000 entries, things can get pretty slow
 
 		//flush recent list
-		$this->_cacheflush('recent'.$subdomain);
+		$this->_cacheflush('recent'.$domain);
 
 		return $id;
 	}
 
-	function _getDupCount($hash, $subdomain)
+	function _getDupCount($hash, $domain)
 	{
-		$this->query('select count(*) as cnt from pastebin where hash is not null and hash=? and domain=? and private_flag=?', $hash, $subdomain, 'n');
+		$this->query('select count(*) as cnt from pastebin where hash is not null and hash=? and domain=? and private_flag=?', $hash, $domain, 'n');
 		return $this->next_record() ? $this->f('cnt') : 0;
 	}
 
-	function isDuplicate($hash, $subdomain)
+	function isDuplicate($hash, $domain)
 	{
-		$dup_count=$this->_getDupCount($hash, $subdomain);
+		$dup_count=$this->_getDupCount($hash, $domain);
 		if ($dup_count>0)
 		{
 			return true;
@@ -205,10 +207,10 @@ class DB extends MySQL
 		return false;
 	}
 
-	function getHashPost($hash, $subdomain)
+	function getHashPost($hash, $domain)
 	{
 		$this->query('select pid '.
-				'from pastebin where hash=? and domain=?', $hash, $subdomain);
+				'from pastebin where hash=? and domain=?', $hash, $domain);
 
 		if ($this->next_record())
 			$id = $this->f('pid');
@@ -222,7 +224,7 @@ class DB extends MySQL
 	* Return entire pastebin row for given id/subdomdain
 	* access public
 	*/
-	function getPost($id, $subdomain)
+	function getPost($id, $domain)
 	{
 		global $is_admin;
 
@@ -232,7 +234,7 @@ class DB extends MySQL
 				'from pastebin where pid=?', $id);
 		}else {
 			$this->query('select *,date_format(posted, \'%a %D %b %H:%i\') as postdate '.
-				'from pastebin where pid=? and domain=?', $id, $subdomain);
+				'from pastebin where pid=? and domain=?', $id, $domain);
 		}
 
 		if ($this->next_record())
@@ -246,19 +248,19 @@ class DB extends MySQL
 	* Return summaries for $count posts ($count=0 means all)
 	* access public
 	*/
-	function getRecentPostSummary($subdomain, $count)
+	function getRecentPostSummary($domain, $count)
 	{
 		global $is_admin;
 		global $CONF;
 
-		if (strlen($subdomain))
-			return $this->searchRecentPostSummary($subdomain, $count);
+		if (strlen($domain))
+			return $this->searchRecentPostSummary($domain, $count);
 
 		$limit=$count?"limit $count":"";
 
 		$posts=array();
 
-		$cacheid="recent".$subdomain;
+		$cacheid="recent".$domain;
 
 		if($is_admin) {
 			$posts=$this->_cachedquery(false, $cacheid, "select p.pid,p.poster,unix_timestamp()-unix_timestamp(p.posted) as age, ".
@@ -270,13 +272,13 @@ class DB extends MySQL
 				"date_format(p.posted, '%a %D %b %H:%i') as postdate ".
 				"from pastebin as p ".
 				"where p.domain=? and p.private_flag=? ".
-				"order by p.posted desc, p.pid desc $limit", $subdomain, 'n');
+				"order by p.posted desc, p.pid desc $limit", $domain, 'n');
 		}
 
 		return $posts;
 	}
 
-	function searchRecentPostSummary($subdomain, $count)
+	function searchRecentPostSummary($domain, $count)
 	{
 		global $is_admin;
 
@@ -293,7 +295,7 @@ class DB extends MySQL
 				"date_format(posted, '%a %D %b %H:%i') as postdate ".
 				"from pastebin ".
 				"where domain=? and private_flag=? ".
-				"order by posted desc, pid desc $limit", $subdomain, 'n');
+				"order by posted desc, pid desc $limit", $domain, 'n');
 		}
 		while ($this->next_record())
 		{
@@ -432,14 +434,14 @@ class DB extends MySQL
 
 	}
 
-	function addAbusePost($pid,$subdomain,$msg)
+	function addAbusePost($pid,$domain,$msg)
 	{
 		$this->query('insert into abuse (pid, domain, msg) '.
 				"values (?, ?, ?)",
-				$pid,$subdomain,$msg);
+				$pid,$domain,$msg);
 	}
 
-	function getAbusePostSummary($subdomain)
+	function getAbusePostSummary($domain)
 	{
 		global $is_admin;
 
@@ -452,7 +454,7 @@ class DB extends MySQL
 		$this->query("select distinct pid ".
 			"from abuse ".
 			"where domain=? ".
-			"order by pid desc", $subdomain);
+			"order by pid desc", $domain);
 		while ($this->next_record())
 		{
 			$posts[]=$this->row;
@@ -462,7 +464,7 @@ class DB extends MySQL
 	}
 
 
-	function getAbusePost($id, $subdomain)
+	function getAbusePost($id, $domain)
 	{
 		global $is_admin;
 
@@ -472,7 +474,7 @@ class DB extends MySQL
 		$abuse='';
 		$hasabuse=false;
 		$this->query('select msg '.
-			'from abuse where pid=? and domain=?', $id, $subdomain);
+			'from abuse where pid=? and domain=?', $id, $domain);
 		while($this->next_record())
 		{
 			$hasabuse=true;
